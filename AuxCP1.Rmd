@@ -1,0 +1,66 @@
+```{r}
+
+genData <- function (lambda, n_draws, n_sim) {
+  # Generation of 'n_sim' cases of averages of 'n_draws' data samples from an 
+  # exponential distribution with parameter lambda (stored as data$x).
+  # Column sz is merely informative and is not used.
+  data <- data.frame(
+    x  = apply(matrix(rexp(n_draws * n_sim, lambda), n_sim), 1, mean),
+    sz = factor(rep(n_draws,n_sim))
+  )
+}
+
+calcCenters <- function () {
+  # calculate the centres (means) both for the simulated data and the theorical
+  # predicition
+  sim_center     <<- mean(data$x);
+  theoric_center <<- 1/lambda;
+  c("Simulation Center"=sim_center, "Theorical Center"=theoric_center)
+}
+
+calcSDs <- function () {
+  # calculate the standard deviations both for the simulated data and the theorical
+  # predicition
+  sim_sd     <<- sd(data$x); 
+  theoric_sd <<- (1/lambda) / sqrt(n_draws);
+  c("Simulation S.D."=sim_center, "Theorical S.D."=theoric_center)
+}
+
+plotDists <- function () {
+  # use ggplot to plot both the distribution of simulated averages, and a matching
+  # normal distribution with mean "sim_center" and standard deviation "sim_sd",
+  # adding a vertical dashed line indicating the center.
+  g <- ggplot(data, aes(x = x))
+  g <- g + geom_histogram(binwidth=.2, colour="black",
+                          fill="salmon", aes(y = ..density..)) 
+  g <- g + stat_function(fun = dnorm, size = 1, args = list(sim_center, sim_sd))
+  g + geom_vline(aes(xintercept=sim_center), linetype="dashed", size=1)
+}
+
+plotQQnorm <- function () {
+  # make a QQ plot, to compare the distribution of averages of simulated data
+  # with a normal distribution Quantile-by-Quantile-wise.
+  # This time, the simulations distribution is converted to resemble a N(0,1)
+  # distribution  transform simulation data to resemble Z(0,1) distribution:
+  qqx <- (data$x - sim_center) / sim_sd
+  
+  # plot
+  qqnorm(qqx, ylab = "Simulation Quiantiles", main="")
+  qqline(qqx)
+}
+
+calcConfInterval <- function (SigmaFactor) {
+  # calculate confidente interval
+  conf_interval <<- sim_center + c("Lower Limit"=-1, "Upper Limit"=1) * SigmaFactor * sim_sd
+  conf_interval
+}
+
+checkConfInterval <- function () {
+  # take the averages and the confidence intervals and, first, calculate how many
+  #of the averages are inside the interval  and return what fraction of the total
+  # averages data it represents
+  coverage <<- length( data$x[data$x >= conf_interval[1] &
+                                data$x <= conf_interval[2]]  ) / n_sim
+}
+
+```

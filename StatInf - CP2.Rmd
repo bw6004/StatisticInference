@@ -1,0 +1,87 @@
+---
+title: Course Project for 'Statistical Inference' on coursera.org Part 2 - Study of the ToothGrowth example data
+author: "R. Rodríguez"
+output:
+  pdf_document:
+    fig_caption: yes
+  html_document: default
+---
+
+```{r,echo=FALSE}
+# Hidden header - loading of packages and functions.
+
+# Load ToothGrowth data
+data(ToothGrowth)
+
+# load packages, hidden
+library(ggplot2)
+```
+
+```{r, child="AuxCP2.Rmd", echo=FALSE, results='hide'}
+# include functions, but do not show them yet. They will be shown in the appendix
+```
+
+The statement for this part of the project says:
+
+> Now in the second portion of the class, we're going to analyze the ToothGrowth data in the R datasets package.
+
+> 1. Load the ToothGrowth da2. ta and perform some basic exploratory data analyses 
+> 2. Provide a basic summary of the data.
+> 3. Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. (Use the techniques from class even if there's other approaches worth considering)
+> 4. State your conclusions and the assumptions needed for your conclusions.
+
+NOTE: Sourcecode for this document available at https://github.com/ricrogz/StatisticInference
+
+For this project we are going to work with data that is built into R. This data is available through the variable `ToothGrowth`. Also, a help page is available, describing the data (?ToothGrowth).
+
+As stated in the documentation, this data comes from an essay testing the effect of Vitamin C on tooth growth in Guinea Pigs. The data consists of the measured tooth length in 6 groups of 10 animals, divided into two groups depending on the delivery method of the Vitamin C (in orange juice or as ascorbic acid): Each of the two groups is also divided into 3 subgroups according to the dosage, 0.5, 1 or 2 mg per dose.
+
+Peeking at the data we can confirm that it matches the description. Also, as the data is quite small, we can have a look at the full table, confirming that we have 60 data samples, 10 for each combination of delivery method and dose.
+
+Since the dosages are standard (0.5, 1, 2), we transform this variable into factor, and then we look at some summary data and make a quick exploratory plot. The code for both the transformation and the peek at the data can be seen in Appendix 2. The generated bar plot ("Figure 1") can be found in Appendix 1.
+
+From this quick peek at the data, we can formulate some observations:
+
+1. Vitamin C dosage seems to have an effect on teeth length, since in both delivery methods a higher Vitamin C dose is associated with longer teeth.
+2. Delivery method also has an influence on tooth length, since orange juice delivery seems to be associated with longer teeth, but with the exception of the highest dosage, where tooth lengths are very close.
+3. The exception mentioned in the previous point might indicate a threshold level between 1 and 2 mg, which marks a "maximum effect point", over which higher doses of Vitamin C produce no additional effect on the tooth growth.
+
+Based on these observations, we propose the following hypotheses, and check them by means of two-group t-tests and p-values. We make no assumptions about the population variances (whether constant or different), and therefore we will use safest approach considering different variances in the populations. In any case, guinea pigs in each essay are different, and therefore we will not consider the data as "paired". The code for the tests and the R outcomes are listed in the Appendix 2.
+
+In relation to the first observation about the dosage, our hypothesis will be that the mean tooth length corresponding to two different dosages is the same. This means checking the hypotheses pairwise. We will make the t-test using the populations from both delivery methods together. First, we compare the 0.5 mg and 1 mg dosages.
+
+In this case, we get an all-negative confidence interval ([-11.984, -6.276]), as well as a very small (< $10^6$) p-value. This indicates that our hypothesis has to be rejected (our interval does not include 0, so means cannot be equal; p-value is below our $\alpha$ of 5%), and confirms our observation about the 1 mg-dosed population having longer teeth than the 0.5 mg one.
+
+If we repeat the test for the 1 and 2 mg doses, we get a similar result, with a slightly higher p-value (< $10^4$), which still leads us to reject the hypothesis of equal means, and thus confirming the hypothesis of the 2 mg dosage producing even longer teeth than the 1 mg doses.
+
+We could do a third test with the 0.5 and 2 mg doses, but the outcome would be the same as the two previous ones, as it is a logical consequence of them, so we will skip it this time.
+
+As for our second observation about the delivery method, in spite of our third observarion, we will make three separate tests, one for each dosage level, since we have observed different behaviors of the lower dosage levels and the higher one.
+
+In each case, we will estabilish the null hypothesis that mean tooth growths for both delivery methods are the same, and checking it with the following tests, one for each dosage level:
+
+The resulting p-values (0.006, 0.001 and 0.964) indicate that we have to reject our hypothesis for the lower dosages, but we fail to reject it for the 2 mg dosage. This indicates that our first observation is right in these two cases, and the delivery method indeed has an influence on the teeth length. 
+
+For the 2 mg dose, we get quite the opposite result, a very high p-value, which does not allow us to reject our null hypothesis, meaning that the tooth length means are the same, and confirming that, according to our third observation, something is happening indeed, since the clear trend in the two lower dosages is lost in the third one.
+
+
+So, we can conclude that:
+
+1. Dosage has influence on tooth length. The higher the dosage (up to 2 mg, no data is available beyond this point), the longer the teeth.
+2. The delivery method is important when the dosage is between 0.5 and 1 mg, but is no longer of influence when dosing 2 mg (more data would be needed to get a more accurate threshold), with orange juice being more effective than ascorbic acid.
+
+
+\pagebreak
+
+## Appendix 1 : Figures ##
+
+Generate exploratory plot:
+
+```{r, fig.width=6, fig.height=3, fig.cap="Exploratory plot"}
+ggplot(data, aes(x = dose, y = len)) + geom_boxplot(aes(fill = dose)) + facet_wrap(~ supp)
+```
+
+## Appendix 2 : Code and output##
+
+```{r, child="AuxCP2.Rmd"}
+```` 
